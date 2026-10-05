@@ -15,23 +15,24 @@ func main() {
 
 func hideURIs(input string) string {
 	const httpPrefix = "http://"
-	var strLength = len(input)
-	var buffer = []byte(input)
-	var sentenceEndings = map[byte]bool{
+	var inputRunes = []rune(input)
+	var buffer = []rune(input)
+	var strLength = len(buffer)
+	var sentenceEndings = map[rune]bool{
 		'.': true,
 		'!': true,
 		'?': true,
 	}
 
 	for i := 0; i < strLength; i++ {
-		if isPrefix(i, input, httpPrefix) {
+		if isPrefix(i, inputRunes, httpPrefix) {
 			i = i + 7
 			for i < strLength && buffer[i] != ' ' {
 				buffer[i] = '*'
 				i++
 			}
-			if sentenceEndings[input[i-1]] {
-				buffer[i-1] = input[i-1]
+			if sentenceEndings[inputRunes[i-1]] {
+				buffer[i-1] = inputRunes[i-1]
 			}
 		}
 	}
@@ -39,10 +40,10 @@ func hideURIs(input string) string {
 	return string(buffer)
 }
 
-func isPrefix(index int, str string, prefix string) bool {
-	if len(str) < index+len(prefix) {
+func isPrefix(index int, runes []rune, prefix string) bool {
+	if len(runes) < index+len(prefix) {
 		return false
 	}
 
-	return str[index:index+len(prefix)] == prefix
+	return string(runes[index:index+len(prefix)]) == prefix
 }
