@@ -7,57 +7,40 @@ import (
 )
 
 func main() {
+	const httpPrefix = "http://"
 	var scanner = bufio.NewScanner(os.Stdin)
+	var input = ""
 	if scanner.Scan() {
-		fmt.Println(hideURIs(scanner.Text()))
+		input = scanner.Text()
 	}
-}
 
-func hideURIs(str string) string {
-	var strLength = len(str)
-	var result = make([]byte, 0, strLength)
+	var strLength = len(input)
+	var buffer = []byte(input)
 	var sentenceEndings = map[byte]bool{
 		'.': true,
 		'!': true,
 		'?': true,
-		')': true,
 	}
-
 	for i := 0; i < strLength; i++ {
-		if str[i] == '/' && i+2 < strLength && i > 4 && str[i-1] == ':' && str[i-2] == 'p' && str[i-3] == 't' && str[i-4] == 't' && str[i-5] == 'h' && str[i+1] == '/' {
-			result = append(result, '/', '/')
-			var prevChar = str[i+2]
-			var starsCount = 0
-			for j := i + 2; j < strLength; j++ {
-				if str[j] != ' ' {
-					starsCount++
-					prevChar = str[j]
-					if j == strLength-1 {
-						if sentenceEndings[prevChar] {
-							starsCount--
-							i = j - 1
-							break
-						}
-						i = j
-						break
-					}
-					continue
-				}
-				if sentenceEndings[prevChar] {
-					starsCount--
-					i = j - 2
-					break
-				}
-				i = j - 1
-				break
+		if isPrefix(i, input, httpPrefix) {
+			i = i + 7
+			for i < strLength && buffer[i] != ' ' {
+				buffer[i] = '*'
+				i++
 			}
-			for j := 0; j < starsCount; j++ {
-				result = append(result, '*')
+			if sentenceEndings[input[i-1]] {
+				buffer[i-1] = input[i-1]
 			}
-			continue
 		}
-		result = append(result, str[i])
 	}
 
-	return string(result)
+	fmt.Println(string(buffer))
+}
+
+func isPrefix(index int, str string, prefix string) bool {
+	if len(str) < index+len(prefix) {
+		return false
+	}
+
+	return str[index:index+len(prefix)] == prefix
 }
