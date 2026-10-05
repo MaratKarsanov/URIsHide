@@ -7,13 +7,14 @@ import (
 )
 
 func main() {
-	const httpPrefix = "http://"
 	var scanner = bufio.NewScanner(os.Stdin)
-	var input = ""
 	if scanner.Scan() {
-		input = scanner.Text()
+		fmt.Println(hideURIs(scanner.Text()))
 	}
+}
 
+func hideURIs(input string) string {
+	const httpPrefix = "http://"
 	var strLength = len(input)
 	var buffer = []byte(input)
 	var sentenceEndings = map[byte]bool{
@@ -21,6 +22,7 @@ func main() {
 		'!': true,
 		'?': true,
 	}
+
 	for i := 0; i < strLength; i++ {
 		if isPrefix(i, input, httpPrefix) {
 			i = i + 7
@@ -34,7 +36,7 @@ func main() {
 		}
 	}
 
-	fmt.Println(string(buffer))
+	return string(buffer)
 }
 
 func isPrefix(index int, str string, prefix string) bool {
