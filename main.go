@@ -10,6 +10,7 @@ func main() {
 	var scanner = bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		fmt.Println(hideURIs(scanner.Text()))
+		fmt.Println(hideURIsFast(scanner.Text()))
 	}
 }
 
@@ -46,4 +47,34 @@ func isPrefix(index int, runes []rune, prefix string) bool {
 	}
 
 	return string(runes[index:index+len(prefix)]) == prefix
+}
+
+func hideURIsFast(str string) string {
+	var strLength = len(str)
+	var result = []byte(str)
+	var sentenceEndings = map[byte]bool{
+		'.': true,
+		'!': true,
+		'?': true,
+	}
+
+	for i := 5; i < strLength-1; i++ {
+		if str[i] == '/' && str[i-1] == ':' && str[i-2] == 'p' && str[i-3] == 't' && str[i-4] == 't' && str[i-5] == 'h' && str[i+1] == '/' {
+			i += 2
+			for j := i; j < strLength; j++ {
+				if str[j] == ' ' {
+					if sentenceEndings[str[j-1]] {
+						result[j-1] = str[j-1]
+					}
+					break
+				}
+				if j == strLength-1 && sentenceEndings[str[j]] {
+					break
+				}
+				result[j] = '*'
+			}
+		}
+	}
+
+	return string(result)
 }
