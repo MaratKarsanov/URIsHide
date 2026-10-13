@@ -1,46 +1,36 @@
 package main
 
 import (
-	"bufio"
+	"URIsHide/internal"
 	"fmt"
 	"os"
 )
 
+const (
+	defaultInputDir  = "./input"
+	defaultOutputDir = "./output"
+)
+
 func main() {
-	var scanner = bufio.NewScanner(os.Stdin)
-	if scanner.Scan() {
-		fmt.Println(hideURIs(scanner.Text()))
-	}
-}
+	inputDir := defaultInputDir
+	outputDir := defaultOutputDir
 
-func hideURIs(str string) string {
-	var prefix = "http://"
-	var prefixLength = len(prefix)
-	var strLength = len(str)
-	var buffer = []byte(str)
-	var sentenceEndings = map[byte]bool{
-		'.': true,
-		'!': true,
-		'?': true,
+	if len(os.Args) > 1 {
+		inputDir = os.Args[1]
+	}
+	if len(os.Args) > 2 {
+		outputDir = os.Args[2]
 	}
 
-	for i := 0; i < strLength-prefixLength; i++ {
-		if str[i:i+prefixLength] == prefix {
-			i += prefixLength
-			for j := i; j < strLength; j++ {
-				if str[j] == ' ' {
-					if sentenceEndings[str[j-1]] {
-						buffer[j-1] = str[j-1]
-					}
-					break
-				}
-				if j == strLength-1 && sentenceEndings[str[j]] {
-					break
-				}
-				buffer[j] = '*'
-			}
-		}
+	var presenter = internal.NewFilePresenter(outputDir)
+	var producer = internal.NewFileProducer(inputDir)
+	var service = internal.NewHideURIsService(producer, presenter)
+
+	var err = service.Run()
+	if err != nil {
+		fmt.Println("При работе сервиса произошла ошибка: ", err)
+		return
 	}
 
-	return string(buffer)
+	fmt.Println("Приложение успешно завершило работу")
 }
