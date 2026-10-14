@@ -22,11 +22,11 @@ func main() {
 		outputDir = os.Args[2]
 	}
 
-	var presenter = internal.NewFilePresenter(outputDir)
-	var producer = internal.NewFileProducer(inputDir)
-	var service = internal.NewHideURIsService(producer, presenter)
+	presenter := internal.NewFilePresenter(outputDir)
+	producer := internal.NewFileProducer(inputDir)
+	service := internal.NewHideURIsService(producer, presenter)
 
-	var err = service.Run()
+	err := service.Run()
 	if err != nil {
 		fmt.Println("При работе сервиса произошла ошибка: ", err)
 		return

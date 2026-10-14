@@ -15,8 +15,8 @@ func NewFileProducer(filePath string) *FileProducer {
 	}
 }
 
-func (producer *FileProducer) Produce() ([]string, error) {
-	file, err := os.OpenFile(producer.filePath, os.O_RDONLY|os.O_CREATE, 0644)
+func (p *FileProducer) Produce() ([]string, error) {
+	file, err := os.OpenFile(p.filePath, os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return nil, err
 	}

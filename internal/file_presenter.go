@@ -15,8 +15,8 @@ func NewFilePresenter(filePath string) *FilePresenter {
 	}
 }
 
-func (presenter *FilePresenter) Present(data []string) error {
-	file, err := os.Create(presenter.filePath)
+func (p *FilePresenter) Present(data []string) error {
+	file, err := os.Create(p.filePath)
 	if err != nil {
 		return err
 	}
