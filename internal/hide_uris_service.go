@@ -1,5 +1,15 @@
 package internal
 
+type HideURIsJob struct {
+	index int
+	str   string
+}
+
+type HideURIsResult struct {
+	index int
+	str   string
+}
+
 type HideURIsService struct {
 	prod Producer
 	pres Presenter
@@ -10,22 +20,32 @@ func NewHideURIsService(prod Producer, pres Presenter) *HideURIsService {
 }
 
 func (s *HideURIsService) Run() error {
+	const workersCount = 10
+
 	data, err := s.prod.Produce()
 	if err != nil {
 		return err
 	}
-	result := make([]string, 0, len(data))
 
-	for _, str := range data {
-		result = append(result, hideURIs(str))
+	pool := NewWorkerPool(workersCount, hideURIs)
+
+	jobs := make(chan HideURIsJob)
+
+	go func() {
+		defer close(jobs)
+		for i, str := range data {
+			jobs <- HideURIsJob{index: i, str: str}
+		}
+	}()
+
+	go pool.Process(jobs)
+
+	result := make([]string, len(data))
+	for r := range pool.Results() {
+		result[r.index] = r.str
 	}
 
-	err = s.pres.Present(result)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.pres.Present(result)
 }
 
 func hideURIs(str string) string {
